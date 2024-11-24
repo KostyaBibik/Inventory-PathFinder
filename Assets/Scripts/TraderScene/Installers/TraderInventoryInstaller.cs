@@ -1,7 +1,7 @@
 ﻿using TraderScene.Extensions;
 using TraderScene.Presenters.Inventory.Impl;
 using TraderScene.Services.Inventory.Impl;
-using TraderScene.Views.Inventory.Impl;
+using TraderScene.Views.Inventory.Windows.Impl;
 using Zenject;
 
 namespace TraderScene.Installers
@@ -21,7 +21,7 @@ namespace TraderScene.Installers
 
         private void InstallUI()
         {
-            Container.BindPresenterWithView<TraderInventoryPresenter, TraderInventoryView>();
+            Container.BindPresenterWithView<TraderInventoryPresenter, TraderInventoryWindow>();
         }
     }
 }

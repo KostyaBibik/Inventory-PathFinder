@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Bottle
   m_EditorClassIdentifier: 
   _name: Bottle
-  _icon: {fileID: 0}
+  _icon: {fileID: 21300000, guid: 9de6d110038f2f44190d12e859b9bfab, type: 3}
   _price: 5
   _count: 1

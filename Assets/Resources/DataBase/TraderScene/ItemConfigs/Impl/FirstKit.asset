@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: FirstKit
   m_EditorClassIdentifier: 
   _name: First Kit
-  _icon: {fileID: 0}
+  _icon: {fileID: 21300000, guid: a219bb120604a2449bfaaae44c95cebe, type: 3}
   _price: 10
   _count: 1

@@ -7,13 +7,13 @@ namespace TraderScene.Presenters
     public abstract class UIPresenter<TView> : IInitializable, IDisposable
         where TView : IUIView
     {
-        private TView _view;
+        private TView _window;
 
-        public TView View => _view;
+        public TView Window => _window;
         
-        public UIPresenter(TView view)
+        public UIPresenter(TView window)
         {
-            _view = view;
+            _window = window;
         }
 
         public virtual void Initialize()

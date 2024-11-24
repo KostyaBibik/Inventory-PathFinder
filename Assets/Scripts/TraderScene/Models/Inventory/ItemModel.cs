@@ -6,12 +6,10 @@ namespace TraderScene.Models.Inventory
     public class ItemModel
     {
         public string Name { get; }
-        public int Price { get; }
         public Sprite Icon { get; }
-        
-        public int Count { get; private set; }
+        public int Price { get; private set; }
 
-        public ItemModel(string name, int price, Sprite icon, int count = 1)
+        public ItemModel(string name, int price, Sprite icon)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -26,18 +24,9 @@ namespace TraderScene.Models.Inventory
             Name = name;
             Price = price;
             Icon = icon;
-            Count = count;
         }
         
-        public void UpdateCount(int delta)
-        {
-            var newCount = Count + delta;
-            if (newCount < 0)
-            {
-                throw new InvalidOperationException("Count cannot be negative.");
-            }
-            
-            Count = newCount;
-        }
+        public void UpdatePrice(int newAmount)
+            => Price = Mathf.Clamp(newAmount, 0, newAmount);
     }
 }

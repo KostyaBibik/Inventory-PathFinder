@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Knife
   m_EditorClassIdentifier: 
   _name: Knife
-  _icon: {fileID: 0}
+  _icon: {fileID: 21300000, guid: 066482470df130c4ab1f364e1da7e65e, type: 3}
   _price: 15
   _count: 1
