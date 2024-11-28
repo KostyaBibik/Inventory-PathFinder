@@ -71,7 +71,10 @@ namespace PathFinding.Core.Utils
             var dir1 = (current - previous).normalized;
             var dir2 = (next - current).normalized;
 
-            return Vector2.Dot(dir1, dir2) < 0.99f ? 1 : 0; // Returns 1 if there's an angle
+            // Returns 1 if there's an angle
+            return Vector2.Dot(dir1, dir2) < 0.99f
+                ? 1
+                : 0;
         }
 
         private static float Cross(Vector2 v1, Vector2 v2)

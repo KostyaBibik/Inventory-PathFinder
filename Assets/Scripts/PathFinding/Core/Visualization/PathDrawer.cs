@@ -40,7 +40,7 @@ namespace PathFinding.Core.Visualization
             var color = Color.green;
             var width = .1f;
             
-            _pathRenderer.RenderPath(new List<Vector2> { corners[0], corners[1], corners[2], corners[3], corners[0] }, Color.green, width);
+            _pathRenderer.RenderPath(new List<Vector2> { corners[0], corners[1], corners[2], corners[3], corners[0] }, color, width);
         }
     }
 }
