@@ -17,7 +17,7 @@ namespace PathFinding.Core.Visualization
                 lineRenderer.SetPosition(i, path[i]);
             }
         }
-
+        
         private LineRenderer CreateLineRenderer(Color color, float width)
         {
             var lineObject = new GameObject("PathLine");

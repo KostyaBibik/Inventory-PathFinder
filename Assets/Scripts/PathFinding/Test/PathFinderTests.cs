@@ -30,7 +30,10 @@ namespace PathFinding.Test
             
             var actualPath = _pathFinder.GetPath(start, end, edges);
             
-            _pathDrawer.DrawPath(actualPath.ToList());
+            if(actualPath != null)
+            {
+                _pathDrawer.DrawPath(actualPath.ToList());
+            }
         }
     }
 }

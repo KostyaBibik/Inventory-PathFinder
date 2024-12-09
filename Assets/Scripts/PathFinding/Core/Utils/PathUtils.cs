@@ -1,83 +1,169 @@
 ﻿using System.Collections.Generic;
-using PathFinding.Core.Models;
+using System.Linq;
 using UnityEngine;
+using PathFinding.Core.Models;
 
 namespace PathFinding.Core.Utils
 {
     public static class PathUtils
     {
-        /// <summary>
-        /// Returns a list of all edges of a rectangle.
-        /// </summary>
-        public static List<(Vector2 start, Vector2 end)> GetRectangleEdges(Rectangle rect)
-        {
-            return new List<(Vector2, Vector2)>
-            {
-                (new Vector2(rect.Min.x, rect.Min.y), new Vector2(rect.Max.x, rect.Min.y)), 
-                (new Vector2(rect.Max.x, rect.Min.y), new Vector2(rect.Max.x, rect.Max.y)), 
-                (new Vector2(rect.Max.x, rect.Max.y), new Vector2(rect.Min.x, rect.Max.y)),
-                (new Vector2(rect.Min.x, rect.Max.y), new Vector2(rect.Min.x, rect.Min.y)) 
-            };
-        }
+        public const float PointSpacing = 0.2f;
 
         /// <summary>
-        /// Checks if a direct path between two points is clear (i.e., does not intersect with any rectangles).
+        /// Builds a graph from given edges.
         /// </summary>
-        public static bool IsDirectPathClear(Vector2 start, Vector2 end, List<Rectangle> obstacles)
+        public static List<Vector2> BuildGraph(IEnumerable<Edge> edges)
         {
-            foreach (var rect in obstacles)
+            var points = new List<Vector2>();
+
+            foreach (var edge in edges)
             {
-                if (DoesLineIntersectRectangle(start, end, rect))
-                    return false;
+                AddRectanglePoints(edge.First, points);
+                AddRectanglePoints(edge.Second, points);
             }
-            return true;
+
+            return points.Distinct().ToList();
         }
 
         /// <summary>
-        /// Checks if a line segment intersects with a rectangle.
+        /// Adds points within a rectangle to the graph.
         /// </summary>
-        private static bool DoesLineIntersectRectangle(Vector2 start, Vector2 end, Rectangle rect)
+        public static void AddRectanglePoints(CustomRectangle rectangle, List<Vector2> points)
         {
-            var edges = GetRectangleEdges(rect);
+            var min = rectangle.Min;
+            var max = rectangle.Max;
 
-            foreach (var (edgeStart, edgeEnd) in edges)
+            for (var x = min.x; x <= max.x; x += PointSpacing)
             {
-                if (DoLinesIntersect(start, end, edgeStart, edgeEnd))
+                for (var y = min.y; y <= max.y; y += PointSpacing)
                 {
-                    return true;
+                    points.Add(new Vector2(x, y));
                 }
             }
+        }
+
+        /// <summary>
+        /// Finds the closest point to the target in the graph.
+        /// </summary>
+        public static Vector2? GetClosestPoint(Vector2 target, List<Vector2> points)
+        {
+            if (!points.Any())
+                return null;
+
+            return points.OrderBy(point => Vector2.Distance(point, target)).First();
+        }
+
+        /// <summary>
+        /// Removes collinear points from the path.
+        /// </summary>
+        public static List<Vector2> RemoveCollinearPoints(List<Vector2> path, IEnumerable<Edge> edges)
+        {
+            var result = new List<Vector2> { path[0] };
+
+            for (int i = 1; i < path.Count - 1; i++)
+            {
+                var prev = result.Last();
+                var current = path[i];
+                var next = path[i + 1];
+
+                if (CanSkipPoint(prev, current, next, edges))
+                {
+                    continue;
+                }
+
+                result.Add(current);
+            }
+
+            result.Add(path.Last());
+            return result;
+        }
+
+        /// <summary>
+        /// Removes unnecessary points by connecting distant points.
+        /// </summary>
+        public static List<Vector2> RemoveCollinearAndUnnecessaryPoints(List<Vector2> path, IEnumerable<Edge> edges)
+        {
+            bool changesMade;
+            var optimizedPath = new List<Vector2>(path);
+
+            do
+            {
+                changesMade = false; 
+
+                for (int i = 0; i < optimizedPath.Count - 1; i++)
+                {
+                    for (int j = i + 2; j < optimizedPath.Count; j++) 
+                    {
+                        if (CanConnect(optimizedPath[i], optimizedPath[j], edges))
+                        {
+                            optimizedPath.RemoveRange(i + 1, j - i - 1);
+                            changesMade = true; 
+                            break; 
+                        }
+                    }
+                }
+            } while (changesMade); 
+
+            return optimizedPath;
+        }
+
+        private static bool CanSkipPoint(Vector2 prev, Vector2 current, Vector2 next, IEnumerable<Edge> edges)
+        {
+            if (IsCollinear(prev, current, next))
+                return true;
+
+            if (CanConnect(prev, next, edges))
+                return true;
+
+            return false; 
+        }
+
+        private static bool IsCollinear(Vector2 a, Vector2 b, Vector2 c)
+        {
+            return Mathf.Abs((b.y - a.y) * (c.x - b.x) - (b.x - a.x) * (c.y - b.y)) < 0.0001f;
+        }
+
+        public static bool CanConnect(Vector2 start, Vector2 end, IEnumerable<Edge> edges)
+        {
+            foreach (var edge in edges)
+            {
+                if (IsLineInsideRectangle(start, end, edge.First) || IsLineInsideRectangle(start, end, edge.Second))
+                    return true;
+            }
+
             return false;
         }
 
-        /// <summary>
-        /// Checks if two line segments intersect.
-        /// </summary>
-        private static bool DoLinesIntersect(Vector2 a1, Vector2 a2, Vector2 b1, Vector2 b2)
+        private static bool IsLineInsideRectangle(Vector2 start, Vector2 end, CustomRectangle rectangle)
         {
-            var d1 = Cross(b2 - b1, a1 - b1);
-            var d2 = Cross(b2 - b1, a2 - b1);
-            var d3 = Cross(a2 - a1, b1 - a1);
-            var d4 = Cross(a2 - a1, b2 - a1);
+            return IsPointInsideRectangle(start, rectangle) && IsPointInsideRectangle(end, rectangle);
+        }
 
-            return d1 * d2 < 0 && d3 * d4 < 0;
+        private static bool IsPointInsideRectangle(Vector2 point, CustomRectangle rectangle)
+        {
+            return point.x >= rectangle.Min.x && point.x <= rectangle.Max.x &&
+                   point.y >= rectangle.Min.y && point.y <= rectangle.Max.y;
         }
 
         /// <summary>
-        /// Calculates the number of turns between three points.
+        /// Optimizes start and end points of the path.
         /// </summary>
-        public static int CalculateTurnCount(Vector2 previous, Vector2 current, Vector2 next)
+        public static IEnumerable<Vector2> OptimizeStartAndEnd(List<Vector2> path, Vector2 start, Vector2 end, IEnumerable<Edge> edges)
         {
-            var dir1 = (current - previous).normalized;
-            var dir2 = (next - current).normalized;
+            var firstPoint = path.First();
+            var lastPoint = path.Last();
 
-            // Returns 1 if there's an angle
-            return Vector2.Dot(dir1, dir2) < 0.99f
-                ? 1
-                : 0;
+            if (CanConnect(start, firstPoint, edges))
+            {
+                path[0] = start; 
+            }
+
+            if (CanConnect(lastPoint, end, edges))
+            {
+                path[path.Count - 1] = end; 
+            }
+
+            return path;
         }
-
-        private static float Cross(Vector2 v1, Vector2 v2)
-            => v1.x * v2.y - v1.y * v2.x;
     }
 }

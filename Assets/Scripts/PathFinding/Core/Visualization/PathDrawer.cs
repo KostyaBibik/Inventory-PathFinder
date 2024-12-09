@@ -7,7 +7,7 @@ namespace PathFinding.Core.Visualization
     public class PathDrawer : IDrawer
     {
        private readonly PathRenderer _pathRenderer = new PathRenderer();
-
+       
        public void DrawRectangles(IEnumerable<Edge> edges)
         {
             foreach (var edge in edges)
@@ -20,7 +20,7 @@ namespace PathFinding.Core.Visualization
         public void DrawPath(List<Vector2> path)
         {
             var color = Color.red;
-            var width = .3f;
+            var width = .22f;
             _pathRenderer.RenderPath(path, color, width);
         }
 
@@ -29,13 +29,13 @@ namespace PathFinding.Core.Visualization
             _pathRenderer.ClearPath();
         }
 
-        private void DrawRectangle(Rectangle rectangle)
+        private void DrawRectangle(CustomRectangle customRectangle)
         {
             var corners = new Vector2[4];
-            corners[0] = rectangle.Min;
-            corners[1] = new Vector2(rectangle.Min.x, rectangle.Max.y);
-            corners[2] = rectangle.Max;
-            corners[3] = new Vector2(rectangle.Max.x, rectangle.Min.y);
+            corners[0] = customRectangle.Min;
+            corners[1] = new Vector2(customRectangle.Min.x, customRectangle.Max.y);
+            corners[2] = customRectangle.Max;
+            corners[3] = new Vector2(customRectangle.Max.x, customRectangle.Min.y);
 
             var color = Color.green;
             var width = .1f;
