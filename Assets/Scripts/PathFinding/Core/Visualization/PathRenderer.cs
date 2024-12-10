@@ -7,7 +7,7 @@ namespace PathFinding.Core.Visualization
     {
         private readonly List<GameObject> _lineObjects = new List<GameObject>();  
 
-        public void RenderPath(List<Vector2> path, Color color, float width)
+        public LineRenderer RenderPath(List<Vector2> path, Color color, float width)
         {
             var lineRenderer = CreateLineRenderer(color, width); 
 
@@ -16,6 +16,8 @@ namespace PathFinding.Core.Visualization
             {
                 lineRenderer.SetPosition(i, path[i]);
             }
+
+            return lineRenderer;
         }
         
         private LineRenderer CreateLineRenderer(Color color, float width)

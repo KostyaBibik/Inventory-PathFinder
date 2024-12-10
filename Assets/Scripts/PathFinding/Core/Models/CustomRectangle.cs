@@ -14,10 +14,10 @@ namespace PathFinding.Core.Models
         /// </summary>
         public Vector2 Max { get; }
 
-        public CustomRectangle(Vector2 min, Vector2 max)
+        public CustomRectangle(Vector2 first, Vector2 second)
         {
-            Min = min;
-            Max = max;
+            Min = new Vector2(Mathf.Min(first.x, second.x), Mathf.Min(first.y, second.y));
+            Max = new Vector2(Mathf.Max(first.x, second.x), Mathf.Max(first.y, second.y));
         }
         
         public static bool operator ==(CustomRectangle rect1, CustomRectangle rect2)

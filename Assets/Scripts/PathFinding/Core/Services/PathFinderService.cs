@@ -16,8 +16,8 @@ namespace PathFinding.Core.Services
         {
             var graph = PathUtils.BuildGraph(edges);
 
-            var startNode = PathUtils.GetClosestPoint(start, graph);
-            var endNode = PathUtils.GetClosestPoint(end, graph);
+            var startNode = PathUtils.HasPointInGraph(start, graph);
+            var endNode = PathUtils.HasPointInGraph(end, graph);
 
             if (startNode == null || endNode == null)
                 return Enumerable.Empty<Vector2>();

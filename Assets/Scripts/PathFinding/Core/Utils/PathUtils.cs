@@ -7,28 +7,29 @@ namespace PathFinding.Core.Utils
 {
     public static class PathUtils
     {
-        public const float PointSpacing = 0.2f;
+        public const float PointSpacing = 1f;
 
         /// <summary>
         /// Builds a graph from given edges.
         /// </summary>
         public static List<Vector2> BuildGraph(IEnumerable<Edge> edges)
         {
-            var points = new List<Vector2>();
-
+            var points = new HashSet<Vector2>();
+            var processedRectangles = new HashSet<CustomRectangle>();
+            
             foreach (var edge in edges)
             {
-                AddRectanglePoints(edge.First, points);
-                AddRectanglePoints(edge.Second, points);
+                ProcessRectangle(edge.First, processedRectangles, points);
+                ProcessRectangle(edge.Second, processedRectangles, points);
             }
 
-            return points.Distinct().ToList();
+            return points.ToList();
         }
 
         /// <summary>
         /// Adds points within a rectangle to the graph.
         /// </summary>
-        public static void AddRectanglePoints(CustomRectangle rectangle, List<Vector2> points)
+        private static void AddRectanglePoints(CustomRectangle rectangle, HashSet<Vector2> points)
         {
             var min = rectangle.Min;
             var max = rectangle.Max;
@@ -43,14 +44,19 @@ namespace PathFinding.Core.Utils
         }
 
         /// <summary>
-        /// Finds the closest point to the target in the graph.
+        /// Finds point in the graph.
         /// </summary>
-        public static Vector2? GetClosestPoint(Vector2 target, List<Vector2> points)
+        public static Vector2? HasPointInGraph(Vector2 target, List<Vector2> points)
         {
             if (!points.Any())
                 return null;
+            
+            if (!points.Contains(target))
+            {
+                return null;
+            }
 
-            return points.OrderBy(point => Vector2.Distance(point, target)).First();
+            return target;
         }
 
         /// <summary>
@@ -60,7 +66,7 @@ namespace PathFinding.Core.Utils
         {
             var result = new List<Vector2> { path[0] };
 
-            for (int i = 1; i < path.Count - 1; i++)
+            for (var i = 1; i < path.Count - 1; i++)
             {
                 var prev = result.Last();
                 var current = path[i];
@@ -90,9 +96,9 @@ namespace PathFinding.Core.Utils
             {
                 changesMade = false; 
 
-                for (int i = 0; i < optimizedPath.Count - 1; i++)
+                for (var i = 0; i < optimizedPath.Count - 1; i++)
                 {
-                    for (int j = i + 2; j < optimizedPath.Count; j++) 
+                    for (var j = i + 2; j < optimizedPath.Count; j++) 
                     {
                         if (CanConnect(optimizedPath[i], optimizedPath[j], edges))
                         {
@@ -107,6 +113,14 @@ namespace PathFinding.Core.Utils
             return optimizedPath;
         }
 
+        private static void ProcessRectangle(CustomRectangle rectangle, HashSet<CustomRectangle> processedRectangles, HashSet<Vector2> points)
+        {
+            if (processedRectangles.Add(rectangle)) 
+            {
+                AddRectanglePoints(rectangle, points);
+            }
+        }
+        
         private static bool CanSkipPoint(Vector2 prev, Vector2 current, Vector2 next, IEnumerable<Edge> edges)
         {
             if (IsCollinear(prev, current, next))

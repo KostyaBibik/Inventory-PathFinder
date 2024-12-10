@@ -13,8 +13,8 @@ namespace PathFinding.Installers
         
         public override void InstallBindings()
         {
-            BindPathFinderComponents();
             BindDrawComponents();
+            BindPathFinderComponents();
             BindTests();
         }
 
@@ -25,7 +25,7 @@ namespace PathFinding.Installers
 
         private void BindDrawComponents()
         {
-            Container.Bind<IDrawer>().To<PathDrawer>().AsSingle().NonLazy();
+            Container.BindInterfacesAndSelfTo<PathDrawer>().AsSingle().NonLazy();
         }
 
         private void BindTests()
